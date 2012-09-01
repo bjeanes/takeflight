@@ -23,7 +23,7 @@
   "integer"
   [{:keys [tag content]}]
 
-  (tag (Integer/parseInt (first content))))
+  {tag (Integer/parseInt (first content))})
 
 (defmethod ->pt
   "datetime"
