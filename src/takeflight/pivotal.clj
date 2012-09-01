@@ -19,7 +19,7 @@
 (defn- get
   ([api-token project-id path] (get api-token project-id path {}))
   ([api-token project-id path params]
-      (request client/get api-token project-id path params)))
+     (request client/get api-token project-id path params)))
 
 (defn stories
   ([project-id api-token] (stories project-id api-token nil))
