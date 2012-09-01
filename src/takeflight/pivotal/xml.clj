@@ -26,6 +26,12 @@
   {tag (Integer/parseInt (first content))})
 
 (defmethod ->pt
+  "float"
+  [{:keys [tag content]}]
+
+  {tag (Float/parseFloat (first content))})
+
+(defmethod ->pt
   "datetime"
   [{:keys [tag content]}]
 
@@ -53,6 +59,10 @@
   [clojure.lang.PersistentStructMap]
   [{:keys [tag content]}]
 
-  (apply merge (map ->pt content)))
+  (let [attributes (map ->pt content)
+        entity (apply merge attributes)]
+    (if (= 1 (count attributes))
+      {tag entity}
+      entity)))
 
 (defmethod ->pt :default [xml] xml)
