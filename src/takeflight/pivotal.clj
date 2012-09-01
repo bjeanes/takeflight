@@ -5,6 +5,8 @@
             [clj-http.client :as client])
   (:import java.io.ByteArrayInputStream))
 
+(def ^:private per-page 100)
+
 (defn- project-url [id]
   (str "https://www.pivotaltracker.com/services/v4/projects/" id))
 
@@ -22,18 +24,26 @@
      (request client/get api-token project-id path params)))
 
 (defn stories
-  ([project-id api-token] (stories project-id api-token nil))
-  ([project-id api-token filter]
-     (let [response (get api-token project-id "/stories" {:filter (str filter)})
-           body (:body response)]
+  ([api-token project-id] (stories api-token project-id nil))
+  ([api-token project-id filter] 
+     (letfn [(get-page [page]
+               (lazy-seq
+                (let [offset (* per-page (dec page))
+                      current-page (get-in (get api-token project-id "/stories"
+                                                {:filter (str filter)
+                                                 :limit per-page
+                                                 :offset offset})
+                                           [:body :stories])]
+                  (when (not-empty current-page)
+                      (concat current-page (get-page (inc page)))))))]
 
-       (:stories body))))
+       (get-page 1))))
 
 (defn releases 
-  [project-id api-token]
-  (stories project-id api-token "type:release includedone:true"))
+  [api-token project-id]
+  (stories api-token project-id "type:release includedone:true"))
 
 (defn project
-  [project-id api-token]
+  [api-token project-id]
   (:body (get api-token project-id "/")))
 
