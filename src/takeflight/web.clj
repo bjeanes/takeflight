@@ -18,6 +18,6 @@
                                  " - "
                                  (:deadline %)
                                  "</li>") 
-                           (filter :deadline (pt/releases id api-token))))
+                           (filter :deadline (pt/releases api-token id))))
                "</ol>")
           "Bad ID"))))
