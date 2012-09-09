@@ -29,6 +29,12 @@
   [api-token project-id]
   (:body (get api-token project-id "/")))
 
+(defn uncompleted-iterations
+  [api-token project-id]
+
+  (get-in (get api-token project-id "/iterations/current_backlog")
+          [:body :iterations]))
+
 (defn stories
   ([api-token project-id] (stories api-token project-id nil))
   ([api-token project-id filter] 
@@ -48,45 +54,60 @@
 (defn backlog+current
   [api-token project-id]
   ;; all states except unscheduled (icebox):
-  (stories api-token project-id "includedone:false state:unstarted,started,finished,delivered,accepted,rejected"))
+  (stories api-token project-id "includedone:false state:unstarted,started,delivered,accepted,rejected"))
+
+(defn unfinished-stories
+  [api-token project-id]
+  ;; all states except unscheduled (icebox):
+  (stories api-token project-id "includedone:false state:unstarted,started"))
 
 (defn releases 
   [api-token project-id]
   (stories api-token project-id "type:release includedone:true"))
 
+;; TODO: refactor the crap out of this!
 (defn releases+projections
   [api-token project-id]
+
   (let [project (project api-token project-id)
-        stories (backlog+current api-token project-id)
         {velocity :current_velocity
-         project-start :first_iteration_start_time
          weeks-per-iteration :iteration_length
-         iteration :current_iteration_number} project
-        points-per-week (/ velocity weeks-per-iteration)
-        days-per-point (/ 7 points-per-week)
-        iteration-start (t/plus (from-date project-start)
-                                (t/weeks (* weeks-per-iteration iteration)))]
+         current-iteration-number :current_iteration_number} project
+        days-per-iteration (* 7 weeks-per-iteration)
+        average-days-per-point (/ velocity days-per-iteration)
+        iterations (uncompleted-iterations api-token project-id)
+        stories (apply
+                 concat
+                 (for [{:keys [stories] :as iteration} iterations
+                       :let [iteration (dissoc iteration :stories)]]
+                   (map #(assoc % :iteration iteration) stories)))
 
-    ;; TODO:
-    ;; iterate over `stories`, adding up the points until we hit a
-    ;; release. when we hit a release, multiply the number of points
-    ;; by days-per-point to get the distance between iteration-start
-    ;; and the expected delivery of the given release. Add that many
-    ;; days to iteration-start to get expected-delivery-date and merge
-    ;; that into the release map and emit it in the resulting sequence
+        calc-etas (fn [{releases :releases :as accum}
+                      {type :story_type
+                       estimate :estimate
+                       {start :start iteration :number} :iteration
+                       :as story}]
 
-    ;; FIXME: This is giving a very different date than PT
-    (letfn [(r [{:keys [points releases] :as accum}
-                {type :story_type estimate :estimate :as story}]
-              (cond
-               points (update-in accum [:points] + estimate)
-               (= "release" type) (-> accum
-                                      (assoc :points 0.0)
-                                      (update-in [:releases] conj
-                                                 (assoc story
-                                                   :eta (to-date (t/plus iteration-start
-                                                                         (t/weeks (* days-per-point points)))))))
-               :else accum))]
-      (:releases (reduce r {:points 0.0 :releases []} stories)))))
+                    (let [start (from-date start)
+                          ;; reset points at each new iteration
+                          accum (if (not= iteration (:iteration accum))
+                                  (assoc accum :points 0.0 :iteration iteration)
+                                  accum)
+                          points (:points accum)
+                          days-till-eta (if (zero? points) 0  (/ average-days-per-point points))
+                          eta (t/plus start (t/days days-till-eta))
+                          eta (to-date eta)]
 
+                      (cond
+                       (and estimate (> estimate 0)) (update-in accum [:points] + estimate)
+                       (= "release" type) (assoc accum
+                                            :points 0.0
+                                            :releases (conj releases
+                                                            (-> story
+                                                                (dissoc :iteration)
+                                                                (assoc :eta eta))))
+                       :else accum)))]
 
+    (:releases (reduce calc-etas
+                       {:points 0.0 :releases [] :iteration current-iteration-number}
+                       stories))))
