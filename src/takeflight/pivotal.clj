@@ -37,7 +37,7 @@
 
 (defn stories
   ([api-token project-id] (stories api-token project-id nil))
-  ([api-token project-id filter] 
+  ([api-token project-id filter]
      (letfn [(get-page [page]
                (lazy-seq
                 (let [offset (* per-page (dec page))
@@ -61,7 +61,7 @@
   ;; all states except unscheduled (icebox):
   (stories api-token project-id "includedone:false state:unstarted,started"))
 
-(defn releases 
+(defn releases
   [api-token project-id]
   (stories api-token project-id "type:release includedone:true"))
 
@@ -100,14 +100,16 @@
 
                       (cond
                        (and estimate (> estimate 0)) (update-in accum [:points] + estimate)
-                       (= "release" type) (assoc accum
-                                            :points 0.0
-                                            :releases (conj releases
-                                                            (-> story
-                                                                (dissoc :iteration)
-                                                                (assoc :eta eta))))
+                       (and (= "release" type)
+                            (:deadline story)) (assoc accum
+                                                 :releases
+                                                 (conj releases
+                                                       (-> story
+                                                           (dissoc :iteration)
+                                                           (assoc :eta eta))))
                        :else accum)))]
 
-    (:releases (reduce calc-etas
-                       {:points 0.0 :releases [] :iteration current-iteration-number}
-                       stories))))
+    (map #(assoc % :project project)
+         (:releases (reduce calc-etas
+                            {:points 0.0 :releases [] :iteration current-iteration-number}
+                            stories)))))
