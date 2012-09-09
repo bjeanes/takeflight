@@ -20,12 +20,18 @@
 (defn- decorate-release-for-display
   [{:keys [name eta deadline project] :as release}]
 
-  (-> release
-      (update-in [:name] str)
-      (update-in [:eta] day-and-month)
-      (update-in [:deadline] day-and-month)
-      (assoc :status (relative-time-for-status deadline eta)
-             :project-name (:name project))))
+  (let [name (str name)
+        status (relative-time-for-status deadline eta)
+        eta (day-and-month eta)
+        deadline (day-and-month deadline)
+        status (if (= eta deadline) "Scheduled" status)
+        project-name (:name project)]
+
+    {:status status
+     :name name
+     :eta eta
+     :deadline deadline
+     :project-name project-name}))
 
 (enlive/defsnippet flight-status-board "views/status-board.html" [:table#status-board]
   [releases]
