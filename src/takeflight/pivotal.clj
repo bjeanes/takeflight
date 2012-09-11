@@ -65,6 +65,13 @@
   [api-token project-id]
   (stories api-token project-id "type:release includedone:true"))
 
+(defn- stories-from-iterations
+  [iterations]
+  (for [{:keys [stories] :as iteration} iterations
+        story stories
+        :let [iteration (dissoc iteration :stories)]]
+    (assoc story :iteration iteration)))
+
 ;; TODO: refactor the crap out of this!
 (defn releases+projections
   [api-token project-id]
@@ -76,10 +83,7 @@
         days-per-iteration (* 7 weeks-per-iteration)
         average-days-per-point (/ velocity days-per-iteration)
         iterations (uncompleted-iterations api-token project-id)
-        stories (for [{:keys [stories] :as iteration} iterations
-                      story stories
-                      :let [iteration (dissoc iteration :stories)]]
-                   (assoc story :iteration iteration))
+        stories (stories-from-iterations iterations)
 
         calc-etas (fn [{releases :releases :as accum}
                       {type :story_type
