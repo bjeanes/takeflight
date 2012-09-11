@@ -90,10 +90,10 @@
                     (let [start (from-date start)
                           ;; reset points at each new iteration
                           accum (if (not= iteration (:iteration accum))
-                                  (assoc accum :points 0.0 :iteration iteration)
+                                  (assoc accum :points 0 :iteration iteration)
                                   accum)
                           points (:points accum)
-                          days-till-eta (if (zero? points) 0  (/ average-days-per-point points))
+                          days-till-eta (if (zero? points) 0 (/ average-days-per-point points))
                           eta (t/plus start (t/days days-till-eta))
                           eta (to-date eta)]
 
@@ -108,5 +108,5 @@
 
     (map #(assoc % :project project)
          (:releases (reduce calc-etas
-                            {:points 0.0 :releases [] :iteration current-iteration-number}
+                            {:points 0 :releases [] :iteration current-iteration-number}
                             stories)))))
