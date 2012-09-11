@@ -18,7 +18,7 @@
         status-class "on-time" ; TODO: 'late', 'early', 'etc'
         eta (day-and-month eta)
         deadline (day-and-month deadline)
-        status (if (= eta deadline) "Scheduled" status)
+        status (if (= eta deadline) "On Time" status)
         project-name (:name project)]
 
     {:status status
