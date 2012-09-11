@@ -76,11 +76,10 @@
         days-per-iteration (* 7 weeks-per-iteration)
         average-days-per-point (/ velocity days-per-iteration)
         iterations (uncompleted-iterations api-token project-id)
-        stories (apply
-                 concat
-                 (for [{:keys [stories] :as iteration} iterations
-                       :let [iteration (dissoc iteration :stories)]]
-                   (map #(assoc % :iteration iteration) stories)))
+        stories (for [{:keys [stories] :as iteration} iterations
+                      story stories
+                      :let [iteration (dissoc iteration :stories)]]
+                   (assoc story :iteration iteration))
 
         calc-etas (fn [{releases :releases :as accum}
                       {type :story_type
