@@ -46,24 +46,25 @@
                 [:.scheduled] (enlive/content deadline)
                 [:.status] (enlive/content status)))
 
+;; TODO: figure out a nice way to get this right
+(def ^:private development? true)
+
 (def ^:private handler
   (routes
+   (GET "/" []
+     (layout nil (enlive/html-content "<a href=\"/584807\">Quantum Lead</a>")))
 
-   (GET "/"
-        []
-
-        (layout nil (enlive/html-content "<a href=\"/584807\">Quantum Lead</a>")))
-
-   (GET "/:id"
-        [id]
-
-        (layout "Project Overview"
-                (if id
-                  (flight-status-board (pt/releases+projections api-token id))
-                  (enlive/content "Bad ID"))))
+   (GET ["/:id" :id #"[0-9]+"] [id]
+     (layout "Project Overview"
+             (if id
+               (flight-status-board (pt/releases+projections api-token id))
+               (enlive/content "Bad ID"))))
 
    (route/resources "/")
-   (route/files "/")
+   (when development? (route/resources "/" {:root "views"}))
    (route/not-found (not-found))))
 
-(def webapp (ring/wrap-reload #'handler '(takeflight.web )))
+(def webapp
+  (if development?
+    (ring/wrap-reload #'handler '(takeflight.web))
+    handler))
