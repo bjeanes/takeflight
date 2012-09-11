@@ -100,12 +100,10 @@
                       (cond
                        (and estimate (> estimate 0)) (update-in accum [:points] + estimate)
                        (and (= "release" type)
-                            (:deadline story)) (assoc accum
-                                                 :releases
-                                                 (conj releases
-                                                       (-> story
-                                                           (dissoc :iteration)
-                                                           (assoc :eta eta))))
+                            (:deadline story)) (update-in accum [:releases] conj
+                                                          (-> story
+                                                              (dissoc :iteration)
+                                                              (assoc :eta eta)))
                        :else accum)))]
 
     (map #(assoc % :project project)
