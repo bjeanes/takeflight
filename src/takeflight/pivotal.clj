@@ -69,10 +69,10 @@
 (defn releases+projections
   [api-token project-id]
 
-  (let [project (project api-token project-id)
-        {velocity :current_velocity
+  (let [{velocity :current_velocity
          weeks-per-iteration :iteration_length
-         current-iteration-number :current_iteration_number} project
+         current-iteration-number :current_iteration_number
+         :as project} (project api-token project-id)
         days-per-iteration (* 7 weeks-per-iteration)
         average-days-per-point (/ velocity days-per-iteration)
         iterations (uncompleted-iterations api-token project-id)
