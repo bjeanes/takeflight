@@ -79,10 +79,8 @@
    previous-points]
 
   (let [days-per-iteration (* 7 weeks-per-iteration)
-        average-days-per-point (/ velocity days-per-iteration)
-        days-till-eta (if (zero? previous-points)
-                        0
-                        (/ average-days-per-point previous-points))]
+        average-days-per-point (/ days-per-iteration velocity)
+        days-till-eta (Math/round (* average-days-per-point previous-points))]
 
     (to-date (t/plus (from-date iteration-start-date)
                      (t/days days-till-eta)))))
