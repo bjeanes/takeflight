@@ -15,10 +15,12 @@
 
   (let [name (str name)
         status (relative-time-for-status deadline eta)
-        status-class "on-time" ; TODO: 'late', 'early', 'etc'
+        status-class (if (before? eta deadline) "early" "late")
         eta (day-and-month eta)
         deadline (day-and-month deadline)
-        status (if (= eta deadline) "On Time" status)
+        on-time (= eta deadline)
+        status (if on-time "On Time" status)
+        status-class (if on-time "on-time" status-class)
         project-name (:name project)]
 
     {:status status
