@@ -1,5 +1,4 @@
 (ns takeflight.pivotal
-  (:refer-clojure :exclude [get])
   (:require clojure.xml
             [takeflight.pivotal.xml :as xml]
             [clj-time.core :as t]
@@ -13,26 +12,23 @@
   (str "https://www.pivotaltracker.com/services/v4/projects/" id))
 
 (defn- request
-  [method api-token project-id path params]
+  ([method api-token project-id path]
+     (request method api-token project-id path {}))
 
-  (method (str (project-url project-id) path)
-              {:query-params params
-               :headers {"X-TrackerToken" api-token}
-               :as :pivotal-xml}))
-
-(defn- get
-  ([api-token project-id path] (get api-token project-id path {}))
-  ([api-token project-id path params]
-     (request client/get api-token project-id path params)))
+  ([method api-token project-id path params]
+     (method (str (project-url project-id) path)
+             {:query-params params
+              :headers {"X-TrackerToken" api-token}
+              :as :pivotal-xml})))
 
 (defn project
   [api-token project-id]
-  (:body (get api-token project-id "/")))
+  (:body (request client/get api-token project-id "/")))
 
 (defn uncompleted-iterations
   [api-token project-id]
 
-  (get-in (get api-token project-id "/iterations/current_backlog")
+  (get-in (request client/get api-token project-id "/iterations/current_backlog")
           [:body :iterations]))
 
 (defn stories
@@ -41,11 +37,15 @@
      (letfn [(get-page [page]
                (lazy-seq
                 (let [offset (* per-page (dec page))
-                      current-page (get-in (get api-token project-id "/stories"
-                                                {:filter (str filter)
-                                                 :limit per-page
-                                                 :offset offset})
-                                           [:body :stories])]
+                      current-page (get-in
+                                    (request client/get
+                                             api-token
+                                             project-id
+                                             "/stories"
+                                             {:filter (str filter)
+                                              :limit per-page
+                                              :offset offset})
+                                    [:body :stories])]
                   (when (not-empty current-page)
                       (concat current-page (get-page (inc page)))))))]
 
@@ -91,7 +91,6 @@
 
   (fn [{:keys [points releases] :as accum}
       {type :story_type
-       estimate :estimate
        deadline :deadline
        {iteration-start :start iteration :number} :iteration
        :as story}]
@@ -99,34 +98,37 @@
     ;; reset iteration points when iteration changes
     (let [accum (if (not= iteration (:iteration accum))
                   (assoc accum :points 0 :iteration iteration)
-                  accum)]
+                  accum)
+          estimate (:estimate story 0)]
 
       (cond
        ;; estimated stories get added to the iteration points
-       (and estimate (> estimate 0)) (update-in accum [:points] + estimate)
+       (> estimate 0) (update-in accum [:points] + estimate)
 
        ;; Things with deadlines (currently only releases) have an
        ;; ETA calculated based on the previous points and velocity
-       deadline (update-in
-                 accum [:releases] conj
-                 (-> story
-                     (dissoc :iteration)
-                     (assoc :eta
-                       (eta-calculator weeks-per-iteration
-                                       velocity
-                                       iteration-start
-                                       points))))
+       deadline (let [eta (eta-calculator
+                           weeks-per-iteration
+                           velocity
+                           iteration-start
+                           (or points 0))
+                      release (assoc story :eta eta)]
+                  (update-in accum [:releases] conj release))
+
        :else accum))))
 
-;; TODO: refactor the crap out of this!
 (defn releases+projections
   [api-token project-id]
 
   (let [project (project api-token project-id)
         iterations (uncompleted-iterations api-token project-id)
-        stories (stories-from-iterations iterations)]
+        stories (stories-from-iterations iterations)
+        cleanup #(-> %
+                     (dissoc :iteration)
+                     (assoc :project project))]
 
-    (map #(assoc % :project project)
-         (:releases (reduce (eta-annotator project)
-                            {:points 0 :releases [] :iteration (:current_iteration_number project)}
-                            stories)))))
+    (map cleanup
+         (:releases
+          (reduce (eta-annotator project)
+                  {:releases []}
+                  stories)))))
