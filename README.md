@@ -22,6 +22,7 @@ You need to have Leiningen 2 for this project
   * Agents?
   * Views can just pull the latest releases
   * No need for persistence beyond the project IDs and API tokens... I think
+1. Now that I'm beyond just flirting with Compojure and Enlive and this is a real project, let's add some tests and clean up the code...
 
 ## License
 
