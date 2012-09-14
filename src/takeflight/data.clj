@@ -38,8 +38,9 @@
       ((fn []
          (doseq [id @projects-to-fetch]
            (future
-             (swap!
-              milestones-by-project
-              #(into % {id (seq (pt/releases+projections api-token id))}))))
+             (let [milestones (pt/releases+projections api-token id)]
+               (swap!
+                milestones-by-project
+                #(assoc % id milestones)))))
          (Thread/sleep milestone-fetch-time-in-ms)
          (recur))))))
