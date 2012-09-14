@@ -8,8 +8,10 @@
 
 (def ^:private per-page 100)
 
+(def ^:private api-url "https://www.pivotaltracker.com/services/v4")
+
 (defn- project-url [id]
-  (str "https://www.pivotaltracker.com/services/v4/projects/" id))
+  (str api-url "/projects/" id))
 
 (defn- request
   ([method api-token project-id path]
@@ -20,6 +22,10 @@
              {:query-params params
               :headers {"X-TrackerToken" api-token}
               :as :pivotal-xml})))
+
+(defn projects
+  [api-token]
+  (:projects (:body (request client/get api-token nil "/"))))
 
 (defn project
   [api-token project-id]

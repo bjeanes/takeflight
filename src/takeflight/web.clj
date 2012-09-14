@@ -2,7 +2,7 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [net.cgrand.enlive-html :as h]
-            [takeflight.pivotal :as pt]
+            [takeflight.data :as data]
             [takeflight.time :refer :all]))
 
 ;; TODO: figure out a nice way to get this right
@@ -57,17 +57,16 @@
                 (h/add-class status-class)
                 (h/content status))))
 
-
 (def webapp
   (routes
    (GET "/" []
-     (layout (h/html-content "<a href=\"/584807\">Quantum Lead</a>")))
-
-   (GET ["/:id" :id #"[0-9]+"] [id]
-     (layout (h/content (if id
-                          (flight-status-board (pt/releases+projections api-token id))
-                          "Bad ID"))))
+     (layout
+      (h/content
+       (flight-status-board (data/milestones)))))
 
    (route/resources "/")
    (when development? (route/resources "/" {:root "views"}))
    (route/not-found (not-found))))
+
+;; TODO: this porbably shouldn't be here
+(data/start-fetchers api-token)
