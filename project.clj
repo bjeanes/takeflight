@@ -10,5 +10,4 @@
                  [joda-time "2.1"]
                  [org.ocpsoft.prettytime/prettytime "1.0.8.Final"]
                  [compojure "1.1.1"]]
-  :resources-path "resources"
   :ring {:handler takeflight.web/webapp})
