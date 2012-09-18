@@ -68,5 +68,8 @@
    (when development? (route/resources "/" {:root "views"}))
    (route/not-found (not-found))))
 
-(defn init [] (data/start-fetchers api-token))
+(defn init
+  []
+  (data/start-fetchers api-token :log? development?))
+
 (defn destroy [] (shutdown-agents))

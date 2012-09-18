@@ -17,30 +17,36 @@
         project-ids (map :id projects)]
     (send projects-to-fetch into project-ids)))
 
-;; TODO: make this idempodent otherwise multiple calls will start
+;; TODO: make this idempotent otherwise multiple calls will start
 ;; multiple scheduler threads
 (defn start-fetchers
-  [api-token]
+  [api-token & {:keys [log?] :or {:log? false}}]
 
-  (future
-    (let [minute-in-ms (* 60 1000)
-          project-fetch-time-in-ms (* 60 minute-in-ms)
-          milestone-fetch-time-in-ms (* 5 minute-in-ms)]
+  (let [log #(when log? (println (apply str %&)))]
+    (log "Starting fetchers...")
 
-      (update-project-list! api-token)
+    (future
+      (let [minute-in-ms (* 60 1000)
+            project-fetch-time-in-ms (* 60 minute-in-ms)
+            milestone-fetch-time-in-ms (* 5 minute-in-ms)]
 
-      (future
+        (log "Updating project list...")
+        (update-project-list! api-token)
+
+        (future
+          ((fn []
+             (Thread/sleep project-fetch-time-in-ms)
+             (log "Updating project list...")
+             (update-project-list! api-token)
+             (recur))))
+
         ((fn []
-           (Thread/sleep project-fetch-time-in-ms)
-           (update-project-list! api-token)
-           (recur))))
-
-      ((fn []
-         (doseq [id @projects-to-fetch]
-           (future
-             (let [milestones (pt/releases+projections api-token id)]
-               (swap!
-                milestones-by-project
-                #(assoc % id milestones)))))
-         (Thread/sleep milestone-fetch-time-in-ms)
-         (recur))))))
+           (doseq [id @projects-to-fetch]
+             (future
+               (log "Fetching project " id)
+               (let [milestones (pt/releases+projections api-token id)]
+                 (swap!
+                  milestones-by-project
+                  #(assoc % id milestones)))))
+           (Thread/sleep milestone-fetch-time-in-ms)
+           (recur)))))))
