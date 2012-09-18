@@ -9,5 +9,7 @@
                  [enlive "1.0.1"]
                  [joda-time "2.1"]
                  [org.ocpsoft.prettytime/prettytime "1.0.8.Final"]
+                 [ring/ring-jetty-adapter "1.1.5"]
                  [compojure "1.1.1"]]
+  :main takeflight.core
   :ring {:handler takeflight.web/webapp})

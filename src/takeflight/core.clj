@@ -1,6 +1,8 @@
-(ns takeflight.core)
+(ns takeflight.core
+  (:gen-class)
+  (:require [ring.adapter.jetty :refer :all]
+            [takeflight.web :refer :all]))
 
 (defn -main
-  "I don't do a whole lot."
-  [& args]
-  (println "Hello, World!"))
+  []
+  (run-jetty webapp {:port 8080}))
