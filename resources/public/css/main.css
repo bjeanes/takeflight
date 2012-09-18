@@ -117,6 +117,7 @@ table#status-board tbody td.late {
 }
 
 table#status-board tbody td.early,
+table#status-board tbody td.landed,
 table#status-board tbody td.on-time {
     color: rgb(138, 227, 43);
     text-shadow: 0px 0px 8px rgba(138, 227, 43, 0.7);

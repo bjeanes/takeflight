@@ -11,7 +11,7 @@
 (def ^:private template "views/layout.html")
 
 (defn- decorate-release-for-display
-  [{:keys [name eta deadline project] :as release}]
+  [{:keys [name current_state eta deadline project] :as release}]
 
   (let [name (str name)
         status (relative-time-for-status deadline eta)
@@ -19,8 +19,11 @@
         eta (day-and-month eta)
         deadline (day-and-month deadline)
         on-time (= eta deadline)
+        landed (= current_state "accepted")
         status (if on-time "On Time" status)
         status-class (if on-time "on-time" status-class)
+        status (if landed "Landed" status)
+        status-class (if landed "landed" status-class)
         project-name (:name project)]
 
     {:status status
