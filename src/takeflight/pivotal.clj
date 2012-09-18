@@ -113,11 +113,12 @@
 
        ;; Things with deadlines (currently only releases) have an
        ;; ETA calculated based on the previous points and velocity
-       deadline (let [eta (eta-calculator
-                           weeks-per-iteration
-                           velocity
-                           iteration-start
-                           (or points 0))
+       deadline (let [eta (or (:accepted_at story)
+                              (eta-calculator
+                               weeks-per-iteration
+                               velocity
+                               iteration-start
+                               (or points 0)))
                       release (assoc story :eta eta)]
                   (update-in accum [:releases] conj release))
 
