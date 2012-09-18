@@ -16,12 +16,6 @@ You need to have Leiningen 2 for this project
   * Each account provides their API token
   * A project list that the API token can see is listed with checkboxes
   * User opts into projects whose releases should be shown
-1. Dashboard should not be per-project.
-  * Each login has own dashboard that shows all their projects they asked for
-1. Fetch all releases in background on a timer
-  * Agents?
-  * Views can just pull the latest releases
-  * No need for persistence beyond the project IDs and API tokens... I think
 1. Now that I'm beyond just flirting with Compojure and Enlive and this is a real project, let's add some tests and clean up the code...
 
 ## License
