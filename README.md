@@ -17,6 +17,7 @@ You need to have Leiningen 2 for this project
   * A project list that the API token can see is listed with checkboxes
   * User opts into projects whose releases should be shown
 1. Now that I'm beyond just flirting with Compojure and Enlive and this is a real project, let's add some tests and clean up the code...
+1. Extract out the pivotal stuff into it's own library
 
 ## License
 
