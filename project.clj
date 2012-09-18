@@ -12,4 +12,6 @@
                  [ring/ring-jetty-adapter "1.1.5"]
                  [compojure "1.1.1"]]
   :main takeflight.core
-  :ring {:handler takeflight.web/webapp})
+  :ring {:handler takeflight.web/handler
+         :init takeflight.web/init
+         :destroy takeflight.web/destroy})

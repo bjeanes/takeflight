@@ -57,7 +57,7 @@
                 (h/add-class status-class)
                 (h/content status))))
 
-(def webapp
+(def handler
   (routes
    (GET "/" []
      (layout
@@ -68,5 +68,5 @@
    (when development? (route/resources "/" {:root "views"}))
    (route/not-found (not-found))))
 
-;; TODO: this porbably shouldn't be here
-(data/start-fetchers api-token)
+(defn init [] (data/start-fetchers api-token))
+(defn destroy [] (shutdown-agents))

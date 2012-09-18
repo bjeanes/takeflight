@@ -1,8 +1,10 @@
 (ns takeflight.core
   (:gen-class)
   (:require [ring.adapter.jetty :refer :all]
-            [takeflight.web :refer :all]))
+            [takeflight.web :as web]))
 
 (defn -main
   []
-  (run-jetty webapp {:port 8080}))
+  (web/init)
+  (run-jetty web/handler {:port 8080})
+  (web/destroy))
