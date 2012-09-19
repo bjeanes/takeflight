@@ -1,4 +1,4 @@
-(defproject takeflight "0.1.0-SNAPSHOT"
+(defproject com.bjeanes/takeflight "0.1.0-SNAPSHOT"
   :description "'Flight Status' dashboard for Pivotal Tracker releases"
   :url "https://github.com/bjeanes/takeflight"
   :license {:name "Eclipse Public License"
