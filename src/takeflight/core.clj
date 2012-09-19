@@ -4,7 +4,7 @@
             [takeflight.web :as web]))
 
 (defn -main
-  []
+  [& args]
   (web/init)
   (run-jetty web/handler {:port 8080})
   (web/destroy))
