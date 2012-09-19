@@ -32,7 +32,11 @@
 (h/deftemplate layout template
   [body]
 
-  [:div#content] (h/content body))
+  [:div#content] (h/content body)
+  [:head [:meta h/last-of-type]] (h/after
+                                  {:tag :meta
+                                   :attrs {:http-equiv "refresh"
+                                           :content 5}}))
 
 (h/defsnippet flight-status-board template [:table#status-board]
   [releases]
