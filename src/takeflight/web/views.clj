@@ -46,9 +46,8 @@
 
   ;; duplicate the first row for each release
   [:tbody :tr]
-   (h/clone-for
-    [{:keys [name eta deadline status status-class project-name]}
-     (map decorate-release-for-display releases)]
+   (h/clone-for [{:keys [name eta deadline status status-class project-name]}
+                 (map decorate-release-for-display releases)]
 
     [:.from] (h/content project-name)
     [:.to] (h/content name)
