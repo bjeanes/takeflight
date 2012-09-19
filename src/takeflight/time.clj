@@ -5,8 +5,7 @@
             [clojure.string :only [:replace] :as str])
   (:import org.ocpsoft.pretty.time.PrettyTime
            java.util.Date
-           java.text.SimpleDateFormat
-           java.util.Locale))
+           java.text.SimpleDateFormat))
 
 (defn distance-of-time-in-words
   [^Date d1 ^Date d2]
