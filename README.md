@@ -1,5 +1,7 @@
 # takeflight
 
+[![Build Status](https://secure.travis-ci.org/bjeanes/takeflight.png)](http://travis-ci.org/bjeanes/takeflight)
+
 A little web app to show a [flight status board](http://culturedcode.com/status/) for Pivotal Tracker projects (and, eventually, maybe others).
 
 ## Developing
