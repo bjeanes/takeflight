@@ -11,6 +11,8 @@
                  [org.ocpsoft.prettytime/prettytime "1.0.8.Final"]
                  [ring/ring-jetty-adapter "1.1.5"]
                  [compojure "1.1.1"]]
+  :plugins [lein-ring "0.7.5"]
+  :min-lein-version "2.0.0"
   :main takeflight.core
   :ring {:handler takeflight.web/handler
          :init takeflight.web/init
