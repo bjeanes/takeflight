@@ -2,67 +2,71 @@
   (:require [clojure.xml :as xml])
   (:import java.text.SimpleDateFormat))
 
+
 (defn- date-parse [^String format ^String date]
   (.parse (java.text.SimpleDateFormat. format) date))
 
-(defn- ->pt+dispatch
+(defn- xml->pt+dispatch
   [{{tag-type :type :as attrs} :attrs
     :keys [tag content]}]
 
   (or tag-type [(type (first content))]))
 
-(defmulti ->pt #'->pt+dispatch)
+(def str->xml
+  #(-> (str %) .getBytes java.io.ByteArrayInputStream. xml/parse))
 
-(defmethod ->pt
+(defmulti xml->pt #'xml->pt+dispatch)
+
+(defmethod xml->pt
   "array"
   [{:keys [tag content]}]
 
-  {tag (vec (map ->pt (or content [])))})
+  {tag (vec (map xml->pt (or content [])))})
 
-(defmethod ->pt
+(defmethod xml->pt
   "integer"
   [{:keys [tag content]}]
 
   {tag (Integer/parseInt (first content))})
 
-(defmethod ->pt
+(defmethod xml->pt
   "float"
   [{:keys [tag content]}]
 
   {tag (Float/parseFloat (first content))})
 
-(defmethod ->pt
+(defmethod xml->pt
   "datetime"
   [{:keys [tag content]}]
 
   {tag (date-parse "y/M/d h:m:s z" (first content))})
 
-(defmethod ->pt
+(defmethod xml->pt
   "date"
   [{:keys [tag content]}]
 
   {tag (date-parse "y/M/d" (first content))})
 
-(defmethod ->pt
+(defmethod xml->pt
   "boolean"
   [{:keys [tag content]}]
 
   {tag (= "true" (first content))})
 
-(defmethod ->pt
+(defmethod xml->pt
   [java.lang.String]
   [{:keys [tag content]}]
 
   {tag (apply str content)})
 
-(defmethod ->pt
+(defmethod xml->pt
   [clojure.lang.PersistentStructMap]
   [{:keys [tag content]}]
 
-  (let [attributes (map ->pt content)
+  (let [attributes (map xml->pt content)
         entity (apply merge attributes)]
     (if (= 1 (count attributes))
       {tag entity}
       entity)))
 
-(defmethod ->pt :default [xml] xml)
+(defmethod xml->pt :default [xml] xml)
