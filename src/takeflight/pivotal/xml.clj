@@ -27,31 +27,31 @@
   "integer"
   [{:keys [tag content]}]
 
-  {tag (Integer/parseInt (first content))})
+  {tag (Integer/parseInt (.trim (first content)))})
 
 (defmethod xml->pt
   "float"
   [{:keys [tag content]}]
 
-  {tag (Float/parseFloat (first content))})
+  {tag (Float/parseFloat (.trim (first content)))})
 
 (defmethod xml->pt
   "datetime"
   [{:keys [tag content]}]
 
-  {tag (date-parse "y/M/d h:m:s z" (first content))})
+  {tag (date-parse "y/M/d H:m:s z" (.trim (first content)))})
 
 (defmethod xml->pt
   "date"
   [{:keys [tag content]}]
 
-  {tag (date-parse "y/M/d" (first content))})
+  {tag (date-parse "y/M/d" (.trim (first content)))})
 
 (defmethod xml->pt
   "boolean"
   [{:keys [tag content]}]
 
-  {tag (= "true" (first content))})
+  {tag (= "true" (.trim (first content)))})
 
 (defmethod xml->pt
   [java.lang.String]
