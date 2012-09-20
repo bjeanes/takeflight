@@ -1,5 +1,6 @@
 (ns takeflight.data
-  (:require [takeflight.pivotal :as pt]))
+  (:require [takeflight.pivotal :as pt]
+            [takeflight.util :refer :all]))
 
 (defonce ^:private milestones-by-project (atom {}))
 (defonce ^:private projects-to-fetch (agent #{}))
@@ -17,36 +18,28 @@
         project-ids (map :id projects)]
     (send projects-to-fetch into project-ids)))
 
+(defn fetch-milestones!
+  [api-token projects-ref milestones-ref]
+
+  (doseq [id @projects-ref]
+    (future
+      (let [milestones (pt/releases+projections api-token id)]
+        (swap! milestones-ref
+               #(assoc % id milestones))))))
+
 ;; TODO: make this idempotent otherwise multiple calls will start
 ;; multiple scheduler threads
 (defn start-fetchers
-  [api-token & {:keys [log?] :or {:log? false}}]
+  [api-token]
 
-  (let [log #(when log? (println (apply str %&)))]
-    (log "Starting fetchers...")
+  (future
+    (let [minutes (partial * 60 1000)]
+      (tick-now (minutes 60)
+                update-project-list!
+                api-token)
 
-    (future
-      (let [minute-in-ms (* 60 1000)
-            project-fetch-time-in-ms (* 60 minute-in-ms)
-            milestone-fetch-time-in-ms (* 5 minute-in-ms)]
-
-        (log "Updating project list...")
-        (update-project-list! api-token)
-
-        (future
-          ((fn []
-             (Thread/sleep project-fetch-time-in-ms)
-             (log "Updating project list...")
-             (update-project-list! api-token)
-             (recur))))
-
-        ((fn []
-           (doseq [id @projects-to-fetch]
-             (future
-               (log "Fetching project " id)
-               (let [milestones (pt/releases+projections api-token id)]
-                 (swap!
-                  milestones-by-project
-                  #(assoc % id milestones)))))
-           (Thread/sleep milestone-fetch-time-in-ms)
-           (recur)))))))
+      (tick-now (minutes 5)
+                fetch-milestones!
+                api-token
+                projects-to-fetch
+                milestones-by-project))))
