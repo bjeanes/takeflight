@@ -14,6 +14,33 @@ You need to have Leiningen 2 for this project
 1. Run the ring server: `TOKEN="your-pivotal-tracker-api-token-here" lein ring server-headless`
 1. To work on the UI, go to http://localhost:3000/layout.html and edit `resources/views/layout.html`
 
+## Deploying
+
+### JAR
+
+1. `lein uberjar`
+1. `scp target/*standalone*.jar your-server:takeflight.jar`
+1. On server: `TOKEN=... java -jar target/takeflight.jar`
+
+### Heroku
+
+#### Initial Setup
+
+Do this once...
+
+1. `bundle install`
+1. `heroku create --stack cedar`
+1. `heroku config:add TOKEN="your-pivotal-tracker-api-token-here"`
+1. Until Heroku uses `leiningen` 2.0.0 or greater, we need to use a custom build pack:
+  1. `heroku labs:enable user_env_compile`
+  1. `heroku config:add BUILDPACK_URL="http://github.com/timewarrior/heroku-buildpack-clojure.git#lein-2" # Use lein-2 branch`
+
+#### Deploying
+
+After the initial setup, do the following for every deploy...
+
+1. `git push heroku master`
+
 ## TODO
 
 1. Account system so different users can have different project lists

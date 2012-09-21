@@ -5,6 +5,8 @@
 
 (defn -main
   [& args]
-  (web/init)
-  (run-jetty web/handler {:port 8080})
-  (web/destroy))
+  (let [port (or (first args) 3000)
+        port (Integer/parseInt port)]
+    (web/init)
+    (run-jetty web/handler {:port port})
+    (web/destroy)))
