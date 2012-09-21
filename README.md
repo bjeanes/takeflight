@@ -4,6 +4,8 @@
 
 A little web app to show a [flight status board](http://culturedcode.com/status/) for Pivotal Tracker projects (and, eventually, maybe others).
 
+![Screenshot](https://www.evernote.com/shard/s2/sh/042f5248-8c73-4c3a-9615-1f9e58d3b286/201131a856332b6ff4c95b60e821f6df/res/71f2d2bd-94c9-4336-a6d6-53411c31e6ac/Take_Flight%21-20120920-192223.jpg.jpg)
+
 ## Developing
 
 You need to have Leiningen 2 for this project
