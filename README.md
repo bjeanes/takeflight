@@ -6,9 +6,13 @@ A little web app to show a [flight status board](http://culturedcode.com/status/
 
 ![Screenshot](https://img.skitch.com/20120921-becxf8y2btcaakqpg9f3qqpcfs.jpg)
 
-## Developing
+Currently, simply providing your Pivotal Tracker API token with the `TOKEN` environment variable will provide
+a list of releases across all projects that the token has access to. Projects are fetched every hour in the
+background and releases are refreshed every 5 minutes. Only releases with deadlines are shown on the dashboard.
 
-You need to have Leiningen 2 for this project
+## Running/Developing
+
+NOTE: You need to have [Leiningen 2](https://github.com/technomancy/leiningen/wiki/Upgrading) for this project.
 
 1. Install the dependencies: `lein deps`
 1. Run the ring server: `TOKEN="your-pivotal-tracker-api-token-here" lein ring server-headless`
