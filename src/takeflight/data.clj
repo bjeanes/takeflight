@@ -27,9 +27,7 @@
         (swap! milestones-ref
                #(assoc % id milestones))))))
 
-;; TODO: make this idempotent otherwise multiple calls will start
-;; multiple scheduler threads
-(defn start-fetchers
+(defn-memo start-fetchers
   [api-token]
 
   (future
