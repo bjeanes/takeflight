@@ -18,9 +18,11 @@ You need to have Leiningen 2 for this project
 
 ### JAR
 
+Some variant of the following:
+
 1. `lein uberjar`
 1. `scp target/*standalone*.jar your-server:takeflight.jar`
-1. On server: `TOKEN=... java -jar target/takeflight.jar`
+1. On server: `TOKEN=... java -jar ~/takeflight.jar`
 
 ### Heroku
 
