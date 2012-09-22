@@ -5,8 +5,10 @@
 
 (defn -main
   [& args]
-  (let [port (or (first args) 3000)
-        port (Integer/parseInt port)]
+  (let [arg1 (first args)
+        port (if arg1
+               (Integer/parseInt arg1)
+               3000)]
     (web/init)
     (run-jetty web/handler {:port port})
     (web/destroy)))
