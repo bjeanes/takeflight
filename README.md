@@ -28,6 +28,11 @@ Some variant of the following:
 1. `scp target/*standalone*.jar your-server:takeflight.jar`
 1. On server: `TOKEN=... java -jar ~/takeflight.jar`
 
+Building a WAR is also possible if you want to deploy to a container of some kind. Just run `lein ring uberwar`
+
+Non-`uber` versions are available, but requires that you make sure the dependencies are available on the
+`CLASSPATH` at runtime.
+
 ### Heroku
 
 #### Initial Setup
